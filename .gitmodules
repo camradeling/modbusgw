@@ -1,0 +1,6 @@
+[submodule "submodules/channellib"]
+	path = submodules/channellib
+	url = git@github.com:camradeling/channellib.git
+[submodule "submodules/modbuslib"]
+	path = submodules/modbuslib
+	url = git@github.com:camradeling/modbuslib.git
