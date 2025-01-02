@@ -4,3 +4,6 @@
 [submodule "submodules/modbuslib"]
 	path = submodules/modbuslib
 	url = git@github.com:camradeling/modbuslib.git
+[submodule "submodules/threadlib"]
+	path = submodules/threadlib
+	url = git@github.com:camradeling/threadlib.git
