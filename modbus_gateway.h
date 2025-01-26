@@ -4,10 +4,9 @@
 #include "chanlib_export.h"
 #include "mxml.h"
 #include "programthread.h"
-#include "modbus_client.h"
-//#include "protocol_adapter.h"
+#include "modbus_master.h"
 //----------------------------------------------------------------------------------------------------------------------
-#define PACKET_SEND_TIMEOUT_MS 		3000
+#define SLAVE_REPLY_TIMEOUT_MS 		3000
 //----------------------------------------------------------------------------------------------------------------------
 #define CHPLWRITELOG(format,...) {if(CHPL->logger) CHPL->logger->write(CHPL->DebugValue,format,##__VA_ARGS__);}
 //----------------------------------------------------------------------------------------------------------------------
@@ -15,16 +14,9 @@ typedef struct _Session
 {
 	weak_ptr<BasicChannel> ch;
 	uint32_t fd = 0;
-	uint8_t	 deviceOnline = 0;
-	timespec_t confirmStamp={0,0};
-	timespec_t kASpan = {0,0};
-	timespec_t kAStamp = {0,0};
-	timespec_t kAStampR = {0,0};
-	bool zipflag=0;
 	uint32_t InSeq=0;
 	uint32_t OutSeq=0;
-	string chanaddr="";
-}Session;
+} Session;
 //----------------------------------------------------------------------------------------------------------------------
 class ProtocolAdapter;
 //----------------------------------------------------------------------------------------------------------------------
@@ -35,13 +27,16 @@ public:
 	virtual ~ModbusGateway(){}
 	virtual void init_module();
 	virtual void thread_job();
-	virtual void process_channel(weak_ptr<BasicChannel> chan);
-	//shared_ptr<ModbusGateway> passGW; // pointer to self
+	virtual void dispatch_event(weak_ptr<BasicChannel> chan, shared_ptr<ProtocolAdapter> adapter);
 	shared_ptr<ChanPool> CHPL;
 	vector<Session> sessionsActive;
 	Session* currentSession=nullptr;
 	mxml_node_t* config=nullptr;
-	shared_ptr<ProtocolAdapter> adapter;
+	weak_ptr<BasicChannel> uplinkChannel;
+	weak_ptr<BasicChannel> downlinkChannel;
+	shared_ptr<ProtocolAdapter> uplink_adapter;
+	shared_ptr<ProtocolAdapter> downlink_adapter;
+	std::vector<ModbusRequest> requests;
 };
 //----------------------------------------------------------------------------------------------------------------------
 #endif/*MODBUS_GATEWAY_H*/

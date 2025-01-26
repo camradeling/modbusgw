@@ -25,8 +25,9 @@ set(Sources
         submodules/modbuslib/modbus_client.cpp
         submodules/modbuslib/modbus_crc_tables.c
         modbus_gateway.cpp
-        #modbus_poller.cpp
         modbus_tcp_slave_adapter.cpp
+        modbus_uart_master_adapter.cpp
+        utils/timespec.cpp
         )
 
 #SET(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. " FORCE)
@@ -38,7 +39,7 @@ include_directories(submodules/channellib)
 include_directories(submodules/threadlib)
 include_directories(submodules/threadlib/messagequeue)
 include_directories(submodules/modbuslib)
-#include_directories(paho_mqtt/src)
+include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${PROJECT_BINARY_DIR})
 
 add_subdirectory(submodules/channellib)

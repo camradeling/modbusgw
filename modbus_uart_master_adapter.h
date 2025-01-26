@@ -1,14 +1,14 @@
-#ifndef MODBUS_TCP_SLAVE_ADAPTER_H
-#define MODBUS_TCP_SLAVE_ADAPTER_H
+#ifndef MODBUS_UART_MASTER_ADAPTER_H
+#define MODBUS_UART_MASTER_ADAPTER_H
 //----------------------------------------------------------------------------------------------------------------------
 #include "protocol_adapter.h"
 //----------------------------------------------------------------------------------------------------------------------
-class ModbusTCPSlaveAdapter : public ProtocolAdapter
+class ModbusUARTMasterAdapter : public ProtocolAdapter
 {
 public:
-    ModbusTCPSlaveAdapter(shared_ptr<ModbusGateway> SGW): ProtocolAdapter(SGW) {}
-    virtual ~ModbusTCPSlaveAdapter(){}
+    ModbusUARTMasterAdapter(shared_ptr<ModbusGateway> SGW): ProtocolAdapter(SGW) {}
+    virtual ~ModbusUARTMasterAdapter(){}
     virtual void process_packet(std::unique_ptr<MessageBuffer> packet);
 };
 //----------------------------------------------------------------------------------------------------------------------
-#endif/*MODBUS_TCP_SLAVE_ADAPTER*/
+#endif/*MODBUS_UART_MASTER_ADAPTER*/
