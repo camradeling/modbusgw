@@ -16,22 +16,19 @@ if(DEBUG_BUILD)
 else()
     message(STATUS "DEBUG_BUILD = OFF")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Os -s")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Os -s")
     #set(CMAKE_INSTALL_RPATH "/")
 endif()
 
 set(Sources
-        main.cpp
-        submodules/modbuslib/modbus_client.cpp
-        submodules/modbuslib/modbus_crc_tables.c
-        modbus_gateway.cpp
-        modbus_slave_adapter.cpp
-        modbus_master_adapter.cpp
-        utils/timespec.cpp
-        )
-
-#SET(PAHO_WITH_SSL TRUE CACHE BOOL "Flag that defines whether to build ssl-enabled binaries too. " FORCE)
-#add_subdirectory(paho_mqtt)
+    main.cpp
+    submodules/modbuslib/modbus_client.cpp
+    submodules/modbuslib/modbus_crc_tables.c
+    modbus_gateway.cpp
+    modbus_slave_adapter.cpp
+    modbus_master_adapter.cpp
+    utils/timespec.cpp
+    )
 
 
 message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
