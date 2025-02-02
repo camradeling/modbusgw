@@ -1,14 +1,17 @@
-#ifndef MODBUS_UART_MASTER_ADAPTER_H
-#define MODBUS_UART_MASTER_ADAPTER_H
+#ifndef MODBUS_MASTER_ADAPTER_H
+#define MODBUS_MASTER_ADAPTER_H
 //----------------------------------------------------------------------------------------------------------------------
+#include "modbus.h"
 #include "protocol_adapter.h"
 //----------------------------------------------------------------------------------------------------------------------
-class ModbusUARTMasterAdapter : public ProtocolAdapter
+class ModbusMasterAdapter : public ProtocolAdapter
 {
 public:
-    ModbusUARTMasterAdapter(shared_ptr<ModbusGateway> SGW): ProtocolAdapter(SGW) {}
-    virtual ~ModbusUARTMasterAdapter(){}
+    ModbusMasterAdapter(shared_ptr<ModbusGateway> SGW, modbus_pdu_type_e tp): ProtocolAdapter(SGW), pdu_type(tp) {}
+    virtual ~ModbusMasterAdapter(){}
     virtual void process_packet(std::unique_ptr<MessageBuffer> packet);
+private:
+    modbus_pdu_type_e pdu_type;
 };
 //----------------------------------------------------------------------------------------------------------------------
-#endif/*MODBUS_UART_MASTER_ADAPTER*/
+#endif/*MODBUS_MASTER_ADAPTER*/

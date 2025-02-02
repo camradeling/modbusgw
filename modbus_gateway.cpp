@@ -1,7 +1,7 @@
 #include "mxmlconf.h"
 #include "modbus_gateway.h"
-#include "modbus_tcp_slave_adapter.h"
-#include "modbus_uart_master_adapter.h"
+#include "modbus_slave_adapter.h"
+#include "modbus_master_adapter.h"
 #include "utils/timespec.h"
 //----------------------------------------------------------------------------------------------------------------------
 void ModbusGateway::init_module()
@@ -25,12 +25,17 @@ void ModbusGateway::init_module()
 		shared_ptr<ProtocolAdapter> adapter;
 		if(schan->funcName == "ModbusTCPSlave") {
 			CHPLWRITELOG("function = ModbusTCPSlave\n");
-			adapter = uplink_adapter = shared_ptr<ProtocolAdapter>(new ModbusTCPSlaveAdapter(shared_from_this()));
+			adapter = uplink_adapter = shared_ptr<ProtocolAdapter>(new ModbusSlaveAdapter(shared_from_this(), MODBUS_TCP_PDU_TYPE));
 			uplinkChannel = schan;
 		}
 		else if(schan->funcName == "ModbusUARTMaster") {
 			CHPLWRITELOG("function = ModbusUARTMaster\n");
-			adapter = downlink_adapter = shared_ptr<ProtocolAdapter>(new ModbusUARTMasterAdapter(shared_from_this()));
+			adapter = downlink_adapter = shared_ptr<ProtocolAdapter>(new ModbusMasterAdapter(shared_from_this(), MODBUS_RTU_PDU_TYPE));
+			downlinkChannel = schan;
+		}
+		else if(schan->funcName == "ModbusTCPMaster") {
+			CHPLWRITELOG("function = ModbusTCPMaster\n");
+			adapter = downlink_adapter = shared_ptr<ProtocolAdapter>(new ModbusMasterAdapter(shared_from_this(), MODBUS_TCP_PDU_TYPE));
 			downlinkChannel = schan;
 		}
 		if (!adapter)
@@ -42,9 +47,34 @@ void ModbusGateway::init_module()
 	ProgramThread::init_module();
 }
 //----------------------------------------------------------------------------------------------------------------------
+void ModbusGateway::process_requests()
+{
+	// process modbus requests
+	timespec_t now;
+	if (clock_gettime(CLOCK_REALTIME, &now)) {
+		// TODO: error handling
+	}
+	std::vector<ModbusPDU>::iterator it;
+	for (it = requests.begin(); it != requests.end(); ++it) {
+		if (it->timestamp.tv_sec == 0) {
+			// request not performed
+			std::unique_ptr<MessageBuffer> packet(new MessageBuffer(0, ModbusPacketConstructor::serialize_request(*it, MODBUS_TCP_PDU_TYPE), CHAN_DATA_PACKET));
+			shared_ptr<BasicChannel> schan = downlinkChannel.lock();
+			if (!schan) {
+				CHPLWRITELOG("no downlink channel - how did that happen?\n");
+			}
+			schan->send_message_buffer(&schan->outQueue, std::move(packet), true);
+		}
+		else if (SLAVE_REPLY_TIMEOUT_MS < timespec_getdiff_ms(it->timestamp, now)) {
+			CHPLWRITELOG("timeout happened - drop request\n");
+			it = requests.erase(it);
+		}
+	}
+}
+//----------------------------------------------------------------------------------------------------------------------
 void ModbusGateway::thread_job()
 {
-	// TODO: add scheduled poll
+	process_requests();
 }
 //----------------------------------------------------------------------------------------------------------------------
 void ModbusGateway::dispatch_event(weak_ptr<BasicChannel> chan, shared_ptr<ProtocolAdapter> adapter)
@@ -77,7 +107,6 @@ void ModbusGateway::dispatch_event(weak_ptr<BasicChannel> chan, shared_ptr<Proto
 			}
 			currentSession = nullptr;
 			CHPLWRITELOG("[%d] channel closed unexpectedly, cleanup and restart...\n", packet->getfd());
-			// TODO: cleanup
 		}
 	}
     while((packet = schan->inQueue.pop()) && !stop)
@@ -100,26 +129,6 @@ void ModbusGateway::dispatch_event(weak_ptr<BasicChannel> chan, shared_ptr<Proto
         else
         	CHPLWRITELOG("Unknown data packet type %d\n", packetType);
 	}
-	// process modbus requests
-	timespec_t now;
-	if (clock_gettime(CLOCK_REALTIME, &now)) {
-		// TODO: error handling
-	}
-	std::vector<ModbusRequest>::iterator it;
-	for (it = requests.begin(); it != requests.end(); ++it) {
-		if (it->timestamp.tv_sec == 0) {
-			// request not performed
-			std::unique_ptr<MessageBuffer> packet(new MessageBuffer(0, ModbusMasterPacketConstructor::serialize_request(*it, MODBUS_TCP_PDU_TYPE), CHAN_DATA_PACKET));
-			shared_ptr<BasicChannel> schan = downlinkChannel.lock();
-			if (!schan) {
-				CHPLWRITELOG("no downlink channel - how did that happen?\n");
-			}
-			schan->send_message_buffer(&schan->outQueue, std::move(packet), true);
-		}
-		else if (SLAVE_REPLY_TIMEOUT_MS < timespec_getdiff_ms(it->timestamp, now)) {
-			CHPLWRITELOG("timeout happened - drop request\n");
-			it = requests.erase(it);
-		}
-	}
+	process_requests();
 }
 //----------------------------------------------------------------------------------------------------------------------

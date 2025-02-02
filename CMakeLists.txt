@@ -25,8 +25,8 @@ set(Sources
         submodules/modbuslib/modbus_client.cpp
         submodules/modbuslib/modbus_crc_tables.c
         modbus_gateway.cpp
-        modbus_tcp_slave_adapter.cpp
-        modbus_uart_master_adapter.cpp
+        modbus_slave_adapter.cpp
+        modbus_master_adapter.cpp
         utils/timespec.cpp
         )
 
