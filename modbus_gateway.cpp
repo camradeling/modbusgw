@@ -58,11 +58,13 @@ void ModbusGateway::process_requests()
 	for (it = requests.begin(); it != requests.end(); ++it) {
 		if (it->timestamp.tv_sec == 0) {
 			// request not performed
-			std::unique_ptr<MessageBuffer> packet(new MessageBuffer(0, ModbusPacketConstructor::serialize_request(*it, MODBUS_TCP_PDU_TYPE), CHAN_DATA_PACKET));
+			std::unique_ptr<MessageBuffer> packet(new MessageBuffer(0, ModbusPacketConstructor::serialize_request(*it, downlink_adapter->pdu_type), CHAN_DATA_PACKET));
 			shared_ptr<BasicChannel> schan = downlinkChannel.lock();
 			if (!schan) {
 				CHPLWRITELOG("no downlink channel - how did that happen?\n");
 			}
+			// TODO: print packet for debugging
+			it->timestamp = now;
 			schan->send_message_buffer(&schan->outQueue, std::move(packet), true);
 		}
 		else if (SLAVE_REPLY_TIMEOUT_MS < timespec_getdiff_ms(it->timestamp, now)) {

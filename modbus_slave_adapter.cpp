@@ -4,7 +4,6 @@
 void ModbusSlaveAdapter::process_packet(std::unique_ptr<MessageBuffer> packet) 
 {
 	// testing echo
-	fprintf(stderr, "ModbusTCPSlaveAdapter::process_packet 1\n");
 	shared_ptr<ModbusGateway> mbgw = MBGW.lock();
 	if (!mbgw)
 		return; // TODO: error handling

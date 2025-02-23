@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 void ModbusMasterAdapter::process_packet(std::unique_ptr<MessageBuffer> packet) 
 {
-    // received messaage from slave
+    // received message from slave
     shared_ptr<ModbusGateway> mbgw = MBGW.lock();
     if (!mbgw)
         return;
@@ -57,7 +57,7 @@ void ModbusMasterAdapter::process_packet(std::unique_ptr<MessageBuffer> packet)
             return; // TODO: error handling
         }
         reply.transactionID = it->transactionID;
-        fprintf(stderr, "created reply: ID: %04X, addr %d, func %d, register %04X, val/num %04X\n", reply.transactionID, reply.SlaveAddress, reply.FunctionCode, reply.reg, reply.cnt);
+        //fprintf(stderr, "created reply: ID: %04X, addr %d, func %d, register %04X, val/num %04X\n", reply.transactionID, reply.SlaveAddress, reply.FunctionCode, reply.reg, reply.cnt);
         // we need mutex here
         int fd = 0;
         shared_ptr<BasicChannel> schan = mbgw->uplinkChannel.lock();
