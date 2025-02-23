@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(modbusgw)
 option(DEBUG_BUILD "Option description" OFF)
+option(DOINSTALL "Option description" OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(BIN_DIR ${CMAKE_BINARY_DIR}/Binaries)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
@@ -19,6 +20,8 @@ else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Os -s")
     #set(CMAKE_INSTALL_RPATH "/")
 endif()
+
+message(STATUS "DOINSTALL = ${DOINSTALL}")
 
 set(Sources
     main.cpp
@@ -55,4 +58,9 @@ target_link_libraries(${PROJECT_NAME} mxml)
 
 add_dependencies(${PROJECT_NAME} static_libs)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION /usr/bin)
+install(FILES install/config.xml
+        DESTINATION /etc/modbusgw)
+install(FILES install/modbusgw.service
+        DESTINATION /etc/systemd/system)
