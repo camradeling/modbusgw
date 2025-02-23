@@ -1,0 +1,16 @@
+<Configuration Version="2.0">
+    <Logger>true</Logger>
+    <Channels>
+        <Channel Type="TCP" Alias="TCP1" Function="ModbusTCPSlave">
+            <ListenPort>502</ListenPort>
+        </Channel>
+        <Channel Type="COMPort" Alias="COM1" Function="ModbusUARTMaster">
+            <Device>/dev/ttyS1</Device>
+            <Bits>8</Bits>
+            <Parity>None</Parity>
+            <StopBits>1</StopBits>
+            <Speed>115200</Speed>
+            <HardwareControl>0</HardwareControl>
+        </Channel>
+    </Channels>
+</Configuration>
