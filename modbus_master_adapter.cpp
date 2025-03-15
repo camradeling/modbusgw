@@ -23,6 +23,15 @@ void ModbusMasterAdapter::process_packet(std::unique_ptr<MessageBuffer> packet)
             continue;
         switch (reply.FunctionCode)
         {
+        case MODBUS_READ_COIL_STATUS:
+            reply.cnt = packet->Data()[MODBUS_REPLY_BYTES_NUMBER_POSITION + offset];
+            if (packet->Length() < 5 + reply.cnt) {
+                fprintf(stderr, "unexpected end of packet\n");
+                return; // TODO: error handling
+            }
+            for (int i = 0; i < reply.cnt; i++)
+                reply.values.push_back(packet->Data()[MODBUS_REPLY_REGISTER_DATA_START + offset + i]);
+            break;
         case MODBUS_READ_HOLDING_REGISTERS:
         case MODBUS_READ_INPUT_REGISTERS:
             reply.cnt = packet->Data()[MODBUS_REPLY_BYTES_NUMBER_POSITION + offset] / 2;
@@ -33,6 +42,10 @@ void ModbusMasterAdapter::process_packet(std::unique_ptr<MessageBuffer> packet)
             for (int i = 0; i < reply.cnt; i++)
                 reply.values.push_back(SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REPLY_REGISTER_DATA_START + offset + i*2]));
             break;
+        case MODBUS_FORCE_SINGLE_COIL:
+            reply.cnt = 1;
+            reply.reg = SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REPLY_REGISTER_ADDRESS_POSITION + offset]);
+            reply.values.push_back(SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REQUEST_REGISTER_VALUE_POSITION + offset]));
         case MODBUS_WRITE_SINGLE_REGISTER:
             // write single register reply is basically an echo of request
             reply.cnt = 1;

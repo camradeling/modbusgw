@@ -24,10 +24,16 @@ void ModbusSlaveAdapter::process_packet(std::unique_ptr<MessageBuffer> packet)
 	req.reg = SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REQUEST_REGISTER_ADDRESS_POSITION + offset]);
 	switch (req.FunctionCode)
 	{
+	case MODBUS_READ_COIL_STATUS:
+		req.cnt = SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REQUEST_REGISTER_NUMBER_POSITION + offset]);
+        break;
 	case MODBUS_READ_HOLDING_REGISTERS:
     case MODBUS_READ_INPUT_REGISTERS:
         req.cnt = SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REQUEST_REGISTER_NUMBER_POSITION + offset]);
         break;
+    case MODBUS_FORCE_SINGLE_COIL:
+		req.cnt = 1;
+		req.values.push_back(SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REQUEST_REGISTER_NUMBER_POSITION + offset]));
     case MODBUS_WRITE_SINGLE_REGISTER:
         req.cnt = 1;
         req.values.push_back(SWAP16(*(uint16_t*)&packet->Data()[MODBUS_REQUEST_REGISTER_NUMBER_POSITION + offset]));
