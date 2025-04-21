@@ -75,7 +75,7 @@ void ModbusMasterAdapter::process_packet(std::unique_ptr<MessageBuffer> packet)
         int fd = 0;
         shared_ptr<BasicChannel> schan = mbgw->uplinkChannel.lock();
         if (!schan) {
-            fprintf(stderr, "no downlink channel - how did that happen?\n");
+            fprintf(stderr, "no uplink channel - how did that happen?\n");
         }
         for (auto& session : mbgw->sessionsActive) {
             if (session.ch.lock() == schan) {
